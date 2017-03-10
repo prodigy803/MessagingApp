@@ -57,7 +57,6 @@ public class Profile extends AppCompatActivity {
                 final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 Intent intent1 = new Intent(Profile.this,ChatAcitivity.class);
                 intent1.putExtra("ReceiverEmail",emailOfSearchedPerson);
-                intent1.putExtra("SenderEmail",user.getEmail());
                 intent1.putExtra("DataFromProfile",true);
                 startActivity(intent1);
             }

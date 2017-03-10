@@ -102,8 +102,8 @@ public class InviteFriendsFragment extends Fragment {
                         for(DataSnapshot postSnapShot: dataSnapshot.getChildren()){
                             Users users = postSnapShot.getValue(Users.class);
                             final String UsernameToBeSearched = acceptUsername.getText().toString();
-//                            Log.i("Names",users.returnNameFromUsers());
-
+                            Log.i("Names",String.valueOf(users.returnNameFromUsers()));//coming as null
+                            Log.i("Names2",String.valueOf(UsernameToBeSearched));
                             if(UsernameToBeSearched.matches(users.returnNameFromUsers())){
                                 usernames.add(users.returnEmailFromUsers().toString());
                                 adapter.notifyDataSetChanged();

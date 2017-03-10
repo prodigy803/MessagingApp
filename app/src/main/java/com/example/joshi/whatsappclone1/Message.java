@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by joshi on 28-02-2017.
  */
-
+//this class is needed for sending the data to the server
 public class Message {
 
     public String ReceiverEmail;
@@ -38,8 +38,8 @@ public class Message {
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
         result.put("Message", Message);
-        result.put("SenderEmail", SenderEmail);
-        result.put("ReceiverEmail", ReceiverEmail);
+        //result.put("SenderEmail", SenderEmail);
+        //result.put("ReceiverEmail", ReceiverEmail);
         return result;
     }
     public Map<String, Object> MessageMap() {

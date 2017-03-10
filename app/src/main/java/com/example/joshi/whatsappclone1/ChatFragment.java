@@ -22,10 +22,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.List;
 
 //This fragment has the all the live chats with a list view
 public class ChatFragment extends Fragment {
     private DatabaseReference mDatabase;
+
     public ChatFragment() {
         // Required empty public constructor
     }
@@ -62,61 +64,42 @@ public class ChatFragment extends Fragment {
         };
         listview.setAdapter(adapter);
 
-        //Information Available at this point:
-        //We can get the current User ID, email(Main important), Name.
+        final DatabaseHandler db = new DatabaseHandler(getActivity());
 
-        //mDatabase = FirebaseDatabase.getInstance().getReference("Messages");
-        //mDatabase = FirebaseDatabase.getInstance().getReference("Messages").getRoot();With root, you go to the Literal root of the cllass
+        //Initiating the Download Of any messages that we may receive:
         mDatabase = FirebaseDatabase.getInstance().getReference("Messages");
-
-
-
-        mDatabase.addChildEventListener(new ChildEventListener() {//We are using this to read data:
+        mDatabase.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                for (DataSnapshot postSnapShot : dataSnapshot.getChildren()) {
-                    Message message = postSnapShot.getValue(Message.class);
-                    String key = String.valueOf(postSnapShot.getKey());
-                    Log.i("Key",key);//Returns me the emails of the dudes:
-                    Log.i("Message",message.returnMessage());
-                    Log.i("Sender",message.returnSenderEmail());
-                    Log.i("Receiver",message.returnReceiverEmail());
-                    Log.i("User Email",user.getEmail());
-                    //We have to change this bit
-                    String s3 = "Conversation With "+ message.returnSenderEmail();
+                for(DataSnapshot postSnapshot: dataSnapshot.getChildren()){
+                    //Log.i("DataSnapShot key",dataSnapshot.getKey());//this is the sender,ie, opposite party
+                    //Log.i("PostSnapShot Key",postSnapshot.getKey());//this is the current User, apun log
+                    //Log.i("Message",String.valueOf(postSnapshot.child("Message").getValue()));//this is the Message from the server
+                    String sender = dataSnapshot.getKey().replace(",",".");
+                    String receiver = postSnapshot.getKey().replace(",",".");
+                    String message = String.valueOf(postSnapshot.child("Message").getValue());
+                    db.addConversationItem(new ConversationsListsDatabase("Conversation With "+sender));
+                    usernames.add(String.valueOf(db.getAllConversationsNames()));
+                    adapter.notifyDataSetChanged();
 
-
-                    if (user.getEmail().matches(message.returnReceiverEmail())){ ///Under Review
-                        String s1 = message.returnMessage();
-                        String s2 = s1.substring(s.indexOf("/") + 1, s.indexOf("/"));
-                        //get the senders email from the Message String
-                        Log.i("Sender Email is",s2);
-                        usernames.add("Conversation With " + s2);
-                        adapter.notifyDataSetChanged();
-
-                        //Log.i("IF Statement"," Executed");
-                        //Log.i("Active user is",message.returnSenderEmail());
-                    }
-                    else if(user.getEmail().matches(message.returnSenderEmail())){
-                        //usernames.add("Conversation With " + receiversEmail);
-                        Log.i("Receiver Email is",message.returnReceiverEmail());
-                        usernames.add("Conversation With " + message.returnReceiverEmail());
-                        adapter.notifyDataSetChanged();
-                    }
-
-                    listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            String Splitter = "Conversation With ";
-                            String s = (String) listview.getItemAtPosition(position);
-                            s = s.replaceAll(Splitter, "");
-                            Log.i("Split String", s);
-                            Intent intent = new Intent(getActivity(), ChatAcitivity.class);
-                            intent.putExtra("userEmailFromChatFragment", s);
-                            intent.putExtra("DataFromProfile", false);
-                            startActivity(intent);
+                    if(receiver.matches(user.getEmail())){
+                        String[] parts = message.split("/");
+                        int lengthOfParts = parts.length;
+                        for(int i=0;i<lengthOfParts;i++){
+                            if(i%2==0){
+                                //Log.i("Message",parts[i]);//all the messages
+                                db.addMessage(new MessageInSql(sender, receiver, parts[i]));
+                            }
                         }
-                    });
+                        mDatabase.child(sender.replace(".",",")).setValue(null);
+                    }
+                    //To check if properly entered, uncomment the following lines
+                    List<ConversationsListsDatabase> conversationNames = db.getAllConversationsNames();
+                    for (ConversationsListsDatabase cn : conversationNames) {
+                        String log = "ConversationItem "+cn.getConversationWith();
+                        // Writing Contacts to log
+                        Log.d("Name: ", log);
+                    }
                 }
             }
 
@@ -140,7 +123,21 @@ public class ChatFragment extends Fragment {
 
             }
         });
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String Splitter = "Conversation With ";
+                String s = (String) listview.getItemAtPosition(position);
+                s = s.replaceAll(Splitter, "");
+                Log.i("Split String", s);
+                Intent intent = new Intent(getActivity(), ChatAcitivity.class);
+                intent.putExtra("userEmailFromChatFragment", s);
+                intent.putExtra("DataFromProfile", false);
+                startActivity(intent);
+            }
+        });
         return view;
     }
+
 }
 
