@@ -6,6 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import java.util.ArrayList;
 import java.util.List;
 //Associated with MessagesInSql
@@ -22,12 +25,12 @@ public class DatabaseHandler extends SQLiteOpenHelper{
     String Conversation = "Conversation";
 
     // Table name
-    String Table_Name2 = "Conversations";
-    String Table_Name1="Messages";
+    String Table_Name2 = "Conversationsv2";
+    String Table_Name1="Messagesv2";
     //Table Creation
     String CREATE_Conversation_TABLE = "CREATE TABLE IF NOT EXISTS '"+ Table_Name1 +"' ("+ SenderEmail +" VARCHAR ,"+ ReceiverEmail +" VARCHAR,"+ Message +" VARCHAR );";
 
-    String CREATE_ConversationsLists_TABLE = "CREATE IF NOT EXISTS TABLE "+Table_Name2+" (Conversation1 VARCHAR)";
+    String CREATE_ConversationsLists_TABLE = "CREATE IF NOT EXISTS TABLE '"+Table_Name2+"' (Conversation1 VARCHAR)";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -60,9 +63,9 @@ public class DatabaseHandler extends SQLiteOpenHelper{
     }
     public List<MessageInSql> getAllMessages(){
         SQLiteDatabase db = this.getWritableDatabase();
-
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         List<MessageInSql> messages = new ArrayList<MessageInSql>();
-        String selectQuery = "SELECT * FROM " + Table_Name1;
+        String selectQuery = "SELECT * FROM " + Table_Name1+ " WHERE "+ SenderEmail + " LIKE '%"+ user.getEmail()+ "%' OR "+ ReceiverEmail +" LIKE '%"+ user.getEmail()+ "%'";
         Cursor cursor = db.rawQuery(selectQuery,null);
         if(cursor.moveToFirst()){
             do{
@@ -87,9 +90,10 @@ public class DatabaseHandler extends SQLiteOpenHelper{
     // Getting All Conversations
     public List<ConversationsListsDatabase> getAllConversationsNames() {
         // Select All Query
+
         SQLiteDatabase db = this.getWritableDatabase();
         List<ConversationsListsDatabase> conversationsList = new ArrayList<ConversationsListsDatabase>();
-        String selectQuery = "SELECT  * FROM "+ Table_Name2;
+        String selectQuery = "SELECT  * FROM "+ Table_Name2 ;
         Cursor cursor = db.rawQuery(selectQuery, null);
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {

@@ -152,7 +152,7 @@ public class ChatAcitivity extends AppCompatActivity {
         };
 
         //Basic initilialization of the App:
-        //db = openOrCreateDatabase("Conversations",MODE_PRIVATE,null);
+
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         chatListView = (ListView) findViewById(R.id.chatListView);
@@ -230,6 +230,7 @@ public class ChatAcitivity extends AppCompatActivity {
 
                             }else{
                                 //Message:
+
 
                             }
                             Log.i("Part",parts[i]);
